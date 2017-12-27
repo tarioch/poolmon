@@ -1,6 +1,7 @@
 from influxdb import InfluxDBClient
 import requests
 import yaml
+from lxml import html
 
 def yiimpBalance(url, address):
     response = requests.get(url + '/api/wallet?address=' + address)
@@ -92,6 +93,44 @@ def active(pool, worker):
         }
     }
 
+def yiimpRate(rateStr):
+    units = {
+            'H/s': 1,
+            'KH/s': 1000,
+            'MH/s': 1000000,
+            'GH/s': 1000000000
+    }
+    parts = rateStr.split()
+    rate = 0
+    if len(parts) == 2:
+        rate = float(parts[0])
+        unit = parts[1]
+        rate = rate * units[unit]
+
+    return rate
+
+def yiimpActive(url, address):
+    response = requests.get(url + '/site/wallet_miners_results?address=' + address)
+    root = html.fromstring(response.content)
+    rows = root.xpath('//table[last()]/tr')
+    workers = []
+    for row in rows:
+        data = []
+        for cell in row.xpath('.//td/text()'):
+            data.append(cell)
+
+        name = data[1].split(',')[0]
+        algo = data[2]
+        rate = yiimpRate(data[4])
+        if rate > 0:
+            workers.append({
+                'name': name,
+                'algo': algo,
+                'rate': rate
+            })
+
+    return workers
+
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
@@ -103,14 +142,20 @@ if __name__ == '__main__':
 
     data = []
 
+
     for pool in config['yiimppools']:
-        amt = yiimpBalance(pool['url'], defAddress)
+        name = pool['name']
+        url = pool['url']
+        workers = yiimpActive(url, defAddress)
+        for worker in workers:
+            data.append(active(name, worker))
+        amt = yiimpBalance(url, defAddress)
         if amt > 0:
-            data.append(balance(pool['name'], amt))
+            data.append(balance(name, amt))
 
     mph = mphBalance(mphApiKey, coins)
     if mph > 0:
-        data.append(balance('miningpoolhub', mph))
+       data.append(balance('miningpoolhub', mph))
 
     mphActive = mphActive(mphApiKey, coins)
     for key, worker in mphActive.items():

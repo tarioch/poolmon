@@ -6,5 +6,7 @@ url = "https://pypi.python.org/simple"
 [dev-packages]
 
 [packages]
+
 influxdb = "*"
 pyyaml = "*"
+lxml = "*"
