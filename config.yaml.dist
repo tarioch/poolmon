@@ -1,0 +1,10 @@
+default:
+    address: yourbitcoinaddress 
+
+miningpoolhub:
+    apikey: yourapikey 
+
+yiimppools:
+    - name: 'zpool'
+      url: 'http://zpool.ca'
+
