@@ -97,6 +97,7 @@ def yiimpRate(rateStr):
     units = {
             'H/s': 1,
             'kH/s': 1000,
+            'kS/s': 1000,
             'MH/s': 1000000,
             'GH/s': 1000000000
     }
