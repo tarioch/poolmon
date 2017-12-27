@@ -96,7 +96,7 @@ def active(pool, worker):
 def yiimpRate(rateStr):
     units = {
             'H/s': 1,
-            'KH/s': 1000,
+            'kH/s': 1000,
             'MH/s': 1000000,
             'GH/s': 1000000000
     }
