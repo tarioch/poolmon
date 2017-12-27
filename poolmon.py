@@ -2,7 +2,7 @@ from influxdb import InfluxDBClient
 import requests
 import yaml
 
-def yiimp(url, address):
+def yiimpBalance(url, address):
     response = requests.get(url + '/api/wallet?address=' + address)
     if response.status_code == 200:
         data = response.json()
@@ -34,7 +34,7 @@ def coinInfo():
 
     return coins
 
-def mph(mphkey, coins):
+def mphBalance(mphkey, coins):
     response = requests.get('https://miningpoolhub.com/index.php?page=api&action=getuserallbalances&api_key=' + mphkey)
     if response.status_code == 200:
         data = response.json()
@@ -58,25 +58,63 @@ def balance(pool, amount):
         }
     }
 
+def mphActive(mphkey, coins):
+    workers = {} 
+    for coinName, coin in coins.items():
+        response = requests.get('https://' + coin['name'] + '.miningpoolhub.com/index.php?page=api&action=getuserworkers&api_key=' + mphkey)
+        if response.status_code == 200:
+            data = response.json()
+            for worker in data['getuserworkers']['data']:
+                hashrate = worker['hashrate']
+                if hashrate > 0:
+                    name = worker['username'].split('.')[1]
+                    algo = coin['algo']
+                    key = name + '_' + algo 
+                    if not key in workers:
+                        workers[key] = {
+                            'name': name,
+                            'algo': algo, 
+                            'rate': 0
+                        }
+                    workers[key]['rate'] += hashrate
+    return workers
+
+def active(pool, worker):
+    return {
+        'measurement': 'hashrate',
+        'tags': {
+            'pool': pool,
+            'worker': worker['name'],
+            'algo': worker['algo']
+        },
+        'fields': {
+            'value': worker['rate']
+        }
+    }
 
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
 
     defAddress = config['default']['address']
+    mphApiKey = config['miningpoolhub']['apikey']
 
     coins = coinInfo()
 
     data = []
 
     for pool in config['yiimppools']:
-        amt = yiimp(pool['url'], defAddress)
+        amt = yiimpBalance(pool['url'], defAddress)
         if amt > 0:
             data.append(balance(pool['name'], amt))
 
-    mph = mph(config['miningpoolhub']['apikey'], coins)
+    mph = mphBalance(mphApiKey, coins)
     if mph > 0:
         data.append(balance('miningpoolhub', mph))
+
+    mphActive = mphActive(mphApiKey, coins)
+    for key, worker in mphActive.items():
+        data.append(active('miningpoolhub', worker))
 
     client = InfluxDBClient(database='poolmon')
     client.write_points(data)
