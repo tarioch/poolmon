@@ -76,6 +76,7 @@ def mphActive(mphkey, coins):
                     key = name + '_' + algo 
                     if not key in workers:
                         workers[key] = {
+                            'miner': None,
                             'name': name,
                             'algo': algo, 
                             'rate': 0
@@ -84,25 +85,28 @@ def mphActive(mphkey, coins):
     return workers
 
 def active(pool, worker):
-    return {
-        'measurement': 'hashrate',
-        'tags': {
-            'pool': pool,
-            'worker': worker['name'],
-            'algo': worker['algo']
-        },
-        'fields': {
-            'value': worker['rate']
-        }
-    }
+    return createActivity(
+        'pool',
+        pool,
+        worker['name'],
+        None,
+        worker['algo'],
+        worker['miner'],
+        worker['rate']
+    )
 
 def extractRate(rateStr):
+    if isinstance(rateStr, float):
+        return rateStr
+
     units = {
             'h/s': 1,
             'kh/s': 1000,
             'ks/s': 1000,
             'mh/s': 1000000,
-            'gh/s': 1000000000
+            'gh/s': 1000000000,
+            'th/s': 1000000000000,
+            'ph/s': 1000000000000000,
     }
     parts = rateStr.split()
     rate = 0
@@ -111,7 +115,7 @@ def extractRate(rateStr):
         unit = parts[1].lower()
         rate = rate * units[unit]
 
-    return rate
+    return float(rate)
 
 def yiimpActive(url, address):
     response = requests.get(url + '/site/wallet_miners_results?address=' + address)
@@ -125,13 +129,13 @@ def yiimpActive(url, address):
 
         name = data[1].split(',')[0]
         algo = data[2]
-        rate = extractRate(data[4])
-        if rate > 0:
-            workers.append({
-                'name': name,
-                'algo': algo,
-                'rate': rate
-            })
+        rate = data[4]
+        workers.append({
+            'miner': data[0],
+            'name': name,
+            'algo': algo,
+            'rate': rate
+        })
 
     return workers
 
@@ -165,7 +169,7 @@ def fetchApis():
 
     client = InfluxDBClient(database='poolmon')
     print(data)
-#   client.write_points(data)
+    client.write_points(data)
 
 app = Flask(__name__)
 
@@ -180,28 +184,51 @@ def handle():
             data.append(stats(worker, miner, i))
 
     client = InfluxDBClient(database='poolmon')
-#    client.write_points(data)
+    client.write_points(data)
     print(data)
 
     return 'ok'
 
 def stats(worker, miner, index):
-    return {
-        'measurement': 'activity',
-        'tags': {
-            'pool': miner['Pool'][index].lower(),
-            'worker': worker,
-            'workertype': miner['Type'][0].lower(),
-            'algo': miner['Algorithm'][0].lower(),
-            'miner': miner['Name'].lower(),
-            'src': 'mpm'
-        },
-        'fields': {
-            'currenthashrate': extractRate(miner['CurrentSpeed'][index]),
-            'estimatedhashrate': extractRate(miner['EstimatedSpeed'][index]),
-            'income': miner['BTC/day']
-        }
-    }
+    return createActivity(
+        'mpm',
+        miner['Pool'][index],
+        worker,
+        miner['Type'][index],
+        miner['Algorithm'][index],
+        miner['Name'],
+        miner['CurrentSpeed'][index],
+        miner['EstimatedSpeed'][index],
+        miner['BTC/day'] if index == 0 else None
+    )
+    
+def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, currentHashrate=None, estimatedHashrate=None, income=None):
+    result = {}
+    result['measurement'] = 'activity'
+
+    tags = {}
+    tags['pool'] = pool.lower()
+    tags['worker'] = worker.lower()
+    if workertype:
+        tags['workertype'] = workertype.lower()
+    if algo:
+        tags['algo'] = algo.lower()
+    if miner:
+        tags['miner'] = miner.lower()
+    tags['src'] = src
+
+    result['tags'] = tags
+
+    fields = {}
+    if currentHashrate:
+        fields['currenthashrate'] = extractRate(currentHashrate)
+    if estimatedHashrate:
+        fields['estimatedhashrate'] = extractRate(estimatedHashrate)
+    if income:
+        fields['income'] = float(income)
+    result['fields'] = fields
+
+    return result
 
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
