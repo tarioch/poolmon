@@ -2,6 +2,9 @@ from influxdb import InfluxDBClient
 import requests
 import yaml
 from lxml import html
+import json
+from flask import Flask, request
+from apscheduler.schedulers.background import BackgroundScheduler
 
 def yiimpBalance(url, address):
     response = requests.get(url + '/api/wallet?address=' + address)
@@ -93,19 +96,19 @@ def active(pool, worker):
         }
     }
 
-def yiimpRate(rateStr):
+def extractRate(rateStr):
     units = {
-            'H/s': 1,
-            'kH/s': 1000,
-            'kS/s': 1000,
-            'MH/s': 1000000,
-            'GH/s': 1000000000
+            'h/s': 1,
+            'kh/s': 1000,
+            'ks/s': 1000,
+            'mh/s': 1000000,
+            'gh/s': 1000000000
     }
     parts = rateStr.split()
     rate = 0
     if len(parts) == 2:
         rate = float(parts[0])
-        unit = parts[1]
+        unit = parts[1].lower()
         rate = rate * units[unit]
 
     return rate
@@ -122,7 +125,7 @@ def yiimpActive(url, address):
 
         name = data[1].split(',')[0]
         algo = data[2]
-        rate = yiimpRate(data[4])
+        rate = extractRate(data[4])
         if rate > 0:
             workers.append({
                 'name': name,
@@ -132,17 +135,15 @@ def yiimpActive(url, address):
 
     return workers
 
-if __name__ == '__main__':
-    with open('config.yaml', 'r') as configFile:
-        config = yaml.safe_load(configFile)
+def fetchApis():
+    print('Fetching APIs')
 
-    defAddress = config['default']['address']
+    defAddress = config['default_address']
     mphApiKey = config['miningpoolhub']['apikey']
 
     coins = coinInfo()
 
     data = []
-
 
     for pool in config['yiimppools']:
         name = pool['name']
@@ -158,9 +159,58 @@ if __name__ == '__main__':
     if mph > 0:
        data.append(balance('miningpoolhub', mph))
 
-    mphActive = mphActive(mphApiKey, coins)
-    for key, worker in mphActive.items():
+    workers = mphActive(mphApiKey, coins)
+    for key, worker in workers.items():
         data.append(active('miningpoolhub', worker))
 
     client = InfluxDBClient(database='poolmon')
-    client.write_points(data)
+    print(data)
+#   client.write_points(data)
+
+app = Flask(__name__)
+
+@app.route('/',methods=['POST'])
+def handle():
+    worker = request.form['workername']
+    miners = json.loads(str(request.form['miners']))
+
+    data = []
+    for miner in miners:
+        for i in range(0, len(miner['Algorithm'])):
+            data.append(stats(worker, miner, i))
+
+    client = InfluxDBClient(database='poolmon')
+#    client.write_points(data)
+    print(data)
+
+    return 'ok'
+
+def stats(worker, miner, index):
+    return {
+        'measurement': 'activity',
+        'tags': {
+            'pool': miner['Pool'][index].lower(),
+            'worker': worker,
+            'workertype': miner['Type'][0].lower(),
+            'algo': miner['Algorithm'][0].lower(),
+            'miner': miner['Name'].lower(),
+            'src': 'mpm'
+        },
+        'fields': {
+            'currenthashrate': extractRate(miner['CurrentSpeed'][index]),
+            'estimatedhashrate': extractRate(miner['EstimatedSpeed'][index]),
+            'income': miner['BTC/day']
+        }
+    }
+
+if __name__ == '__main__':
+    with open('config.yaml', 'r') as configFile:
+        config = yaml.safe_load(configFile)
+
+    pollInterval = config['poll_interval']
+    if pollInterval > 0:
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(fetchApis, 'interval', minutes=pollInterval)
+        scheduler.start()
+
+    app.run(host=config['host'], port=config['port'])
