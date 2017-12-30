@@ -108,6 +108,7 @@ def extractRate(rateStr):
             'th/s': 1000000000000,
             'ph/s': 1000000000000000,
     }
+    rateStr = rateStr.replace(',', '.')
     parts = rateStr.split()
     rate = 0
     if len(parts) == 2:
@@ -225,7 +226,7 @@ def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, cu
     if estimatedHashrate:
         fields['estimatedhashrate'] = extractRate(estimatedHashrate)
     if income:
-        fields['income'] = float(income)
+        fields['income'] = float(income.replace(',', '.'))
     result['fields'] = fields
 
     return result
@@ -240,4 +241,4 @@ if __name__ == '__main__':
         scheduler.add_job(fetchApis, 'interval', minutes=pollInterval)
         scheduler.start()
 
-    app.run(host=config['host'], port=config['port'])
+    app.run(host=config['host'], port=config['port'], threaded=True)
