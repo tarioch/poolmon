@@ -11,7 +11,12 @@ def yiimpBalance(url, addresses, coins):
     for address in addresses:
         response = requests.get(url + '/api/wallet?address=' + address)
         if response.status_code == 200:
-            data = response.json()
+            try:
+                data = response.json()
+            except:
+                print(response.text)
+                raise
+
             unpaid = data['unpaid']
             cur = data['currency']
             if cur == 'BTC':
