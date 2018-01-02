@@ -7,15 +7,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from yiimp import Yiimp
 from miningpoolhub import MiningPoolHub
 
-def all(coin):
-    total = 0
-    total += coin['confirmed']
-    total += coin['unconfirmed']
-    total += coin['ae_confirmed']
-    total += coin['ae_unconfirmed']
-    total += coin['exchange']
-    return total
-
 def coinInfo():
     response = requests.get('https://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics')
     coins = {} 
@@ -75,6 +66,34 @@ def extractRate(rateStr):
         rate = rate * units[unit]
 
     return float(rate)
+
+def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, currentHashrate=None, estimatedHashrate=None, income=None):
+    result = {}
+    result['measurement'] = 'activity'
+
+    tags = {}
+    tags['pool'] = pool.lower()
+    tags['worker'] = worker.lower()
+    if workertype:
+        tags['workertype'] = workertype.lower()
+    if algo:
+        tags['algo'] = algo.lower()
+    if miner:
+        tags['miner'] = miner.lower()
+    tags['src'] = src
+
+    result['tags'] = tags
+
+    fields = {}
+    if currentHashrate:
+        fields['currenthashrate'] = extractRate(currentHashrate)
+    if estimatedHashrate:
+        fields['estimatedhashrate'] = extractRate(estimatedHashrate)
+    if income:
+        fields['income'] = float(income.replace(',', '.'))
+    result['fields'] = fields
+
+    return result
 
 def fetchApis():
     print('Fetching APIs')
@@ -137,34 +156,6 @@ def stats(worker, miner, index):
         miner['BTC/day'] if index == 0 else None
     )
     
-def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, currentHashrate=None, estimatedHashrate=None, income=None):
-    result = {}
-    result['measurement'] = 'activity'
-
-    tags = {}
-    tags['pool'] = pool.lower()
-    tags['worker'] = worker.lower()
-    if workertype:
-        tags['workertype'] = workertype.lower()
-    if algo:
-        tags['algo'] = algo.lower()
-    if miner:
-        tags['miner'] = miner.lower()
-    tags['src'] = src
-
-    result['tags'] = tags
-
-    fields = {}
-    if currentHashrate:
-        fields['currenthashrate'] = extractRate(currentHashrate)
-    if estimatedHashrate:
-        fields['estimatedhashrate'] = extractRate(estimatedHashrate)
-    if income:
-        fields['income'] = float(income.replace(',', '.'))
-    result['fields'] = fields
-
-    return result
-
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
