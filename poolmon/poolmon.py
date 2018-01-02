@@ -104,7 +104,7 @@ def fetchApis():
 
     print(data)
     client = InfluxDBClient(database='poolmon')
-#    client.write_points(data)
+    client.write_points(data)
 
 app = Flask(__name__)
 
