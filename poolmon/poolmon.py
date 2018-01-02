@@ -1,32 +1,11 @@
 from influxdb import InfluxDBClient
 import requests
 import yaml
-from lxml import html
 import json
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
-
-def yiimpBalance(url, addresses, coins):
-    amt = 0
-    for address in addresses:
-        response = requests.get(url + '/api/wallet?address=' + address)
-        if response.status_code == 200:
-            try:
-                data = response.json()
-            except:
-                print(response.text)
-                raise
-
-            unpaid = data['unpaid']
-            cur = data['currency']
-            if cur == 'BTC':
-                cur = 'bitcoin'
-            elif cur == 'LTC':
-                cur = 'litecoin'
-            rate = coins[cur]['price']
-            amt += unpaid * rate 
-
-    return amt
+from yiimp import Yiimp
+from miningpoolhub import MiningPoolHub
 
 def all(coin):
     total = 0
@@ -52,19 +31,6 @@ def coinInfo():
 
     return coins
 
-def mphBalance(mphkey, coins):
-    response = requests.get('https://miningpoolhub.com/index.php?page=api&action=getuserallbalances&api_key=' + mphkey)
-    if response.status_code == 200:
-        data = response.json()
-        balances = data['getuserallbalances']['data']
-        total = 0
-        for balance in balances:
-            cur = balance['coin']
-            sum = all(balance)
-            rate = coins[cur]['price']
-            total += sum * rate
-            return total
-
 def balance(pool, amount):
     return {
         'measurement': 'balance',
@@ -75,28 +41,6 @@ def balance(pool, amount):
             'value': amount
         }
     }
-
-def mphActive(mphkey, coins):
-    workers = {} 
-    for coinName, coin in coins.items():
-        response = requests.get('https://' + coin['name'] + '.miningpoolhub.com/index.php?page=api&action=getuserworkers&api_key=' + mphkey)
-        if response.status_code == 200:
-            data = response.json()
-            for worker in data['getuserworkers']['data']:
-                hashrate = worker['hashrate']
-                if hashrate > 0:
-                    name = worker['username'].split('.')[1]
-                    algo = coin['algo']
-                    key = name + '_' + algo 
-                    if not key in workers:
-                        workers[key] = {
-                            'miner': None,
-                            'name': name,
-                            'algo': algo, 
-                            'rate': 0
-                        }
-                    workers[key]['rate'] += hashrate
-    return workers
 
 def active(pool, worker):
     return createActivity(
@@ -132,61 +76,35 @@ def extractRate(rateStr):
 
     return float(rate)
 
-def yiimpActive(url, address):
-    response = requests.get(url + '/site/wallet_miners_results?address=' + address)
-    root = html.fromstring(response.content)
-    rows = root.xpath('//table[last()]/tr')
-    workers = []
-    for row in rows:
-        data = []
-        for cell in row.xpath('.//td/text()'):
-            data.append(cell)
-
-        name = data[1].split(',')[0]
-        algo = data[2]
-        rate = data[4]
-        workers.append({
-            'miner': data[0],
-            'name': name,
-            'algo': algo,
-            'rate': rate
-        })
-
-    return workers
-
 def fetchApis():
     print('Fetching APIs')
-
-    defAddress = config['default_address']
-    mphApiKey = config['miningpoolhub']['apikey']
 
     coins = coinInfo()
 
     data = []
-
-    for pool in config['yiimppools']:
+    for pool in config['pools']:
         name = pool['name']
-        url = pool['url']
-        addresses = pool['addresses']
-        for address in addresses:
-            workers = yiimpActive(url, address)
-            for worker in workers:
-                data.append(active(name, worker))
-        amt = yiimpBalance(url, addresses, coins)
+
+        type = pool['type']
+        if 'yiimp' == type:
+            fetcher = Yiimp()
+        elif 'miningpoolhub' == type:
+            fetcher = MiningPoolHub()
+        else:
+            raise ValueError('Invalid type ' + type + ' for pool ' + name)
+
+        amt = fetcher.balance(pool, coins)
         if amt > 0:
             data.append(balance(name, amt))
 
-    mph = mphBalance(mphApiKey, coins)
-    if mph > 0:
-       data.append(balance('miningpoolhub', mph))
+        workers = fetcher.workers(pool, coins)
+        for worker in workers:
+            data.append(active(name, worker))
 
-    workers = mphActive(mphApiKey, coins)
-    for key, worker in workers.items():
-        data.append(active('miningpoolhub', worker))
 
-    client = InfluxDBClient(database='poolmon')
     print(data)
-    client.write_points(data)
+    client = InfluxDBClient(database='poolmon')
+#    client.write_points(data)
 
 app = Flask(__name__)
 

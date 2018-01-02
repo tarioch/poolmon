@@ -1,2 +1,5 @@
 Pipfile.lock
 config.yaml
+__pycache__/
+*.py[cod]
+*$py.class
