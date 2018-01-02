@@ -6,13 +6,22 @@ import json
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 
-def yiimpBalance(url, address):
-    response = requests.get(url + '/api/wallet?address=' + address)
-    if response.status_code == 200:
-        data = response.json()
-        return data['unpaid']
-    else:
-        return 0
+def yiimpBalance(url, addresses, coins):
+    amt = 0
+    for address in addresses:
+        response = requests.get(url + '/api/wallet?address=' + address)
+        if response.status_code == 200:
+            data = response.json()
+            unpaid = data['unpaid']
+            cur = data['currency']
+            if cur == 'BTC':
+                cur = 'bitcoin'
+            elif cur == 'LTC':
+                cur = 'litecoin'
+            rate = coins[cur]['price']
+            amt += unpaid * rate 
+
+    return amt
 
 def all(coin):
     total = 0
@@ -153,10 +162,12 @@ def fetchApis():
     for pool in config['yiimppools']:
         name = pool['name']
         url = pool['url']
-        workers = yiimpActive(url, defAddress)
-        for worker in workers:
-            data.append(active(name, worker))
-        amt = yiimpBalance(url, defAddress)
+        addresses = pool['addresses']
+        for address in addresses:
+            workers = yiimpActive(url, address)
+            for worker in workers:
+                data.append(active(name, worker))
+        amt = yiimpBalance(url, addresses, coins)
         if amt > 0:
             data.append(balance(name, amt))
 
@@ -235,6 +246,7 @@ if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
 
+    fetchApis()
     pollInterval = config['poll_interval']
     if pollInterval > 0:
         scheduler = BackgroundScheduler()
