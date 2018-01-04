@@ -10,18 +10,18 @@ class Yiimp:
             if response.status_code == 200 and response.text.strip():
                 try:
                     data = response.json()
+                    unpaid = data['unpaid']
+                    cur = data['currency']
+                    if cur == 'BTC':
+                        cur = 'bitcoin'
+                    elif cur == 'LTC':
+                        cur = 'litecoin'
+                    print(unpaid)
+                    rate = coins[cur]['price']
+                    amt += unpaid * rate 
                 except:
                     print(response.text)
                     raise
-
-                unpaid = data['unpaid']
-                cur = data['currency']
-                if cur == 'BTC':
-                    cur = 'bitcoin'
-                elif cur == 'LTC':
-                    cur = 'litecoin'
-                rate = coins[cur]['price']
-                amt += unpaid * rate 
 
         return amt
 
