@@ -100,6 +100,7 @@ def fetchApis():
 
     coins = coinInfo()
 
+    client = InfluxDBClient(database='poolmon')
     for pool in config['pools']:
         name = pool['name']
 
