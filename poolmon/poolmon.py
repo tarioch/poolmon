@@ -100,7 +100,6 @@ def fetchApis():
 
     coins = coinInfo()
 
-    data = []
     for pool in config['pools']:
         name = pool['name']
 
@@ -114,16 +113,16 @@ def fetchApis():
 
         amt = fetcher.balance(pool, coins)
         if amt > 0:
+            data = []
             data.append(balance(name, amt))
+            client.write_points(data)
 
+        data = []
         workers = fetcher.workers(pool, coins)
         for worker in workers:
             data.append(active(name, worker))
 
-
-    print(data)
-    client = InfluxDBClient(database='poolmon')
-    client.write_points(data)
+        client.write_points(data)
 
 app = Flask(__name__)
 
