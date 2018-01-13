@@ -6,24 +6,37 @@ class Yiimp:
         url = config['url']
         amt = 0
         for address in config['addresses']:
-            response = requests.get(url + '/api/wallet?address=' + address)
-            if response.status_code == 200 and response.text.strip():
-                try:
-                    data = response.json()
-                    unpaid = data['unpaid']
-                    cur = data['currency']
-                    if cur == 'BTC':
-                        cur = 'bitcoin'
-                    elif cur == 'LTC':
-                        cur = 'litecoin'
-                    print(unpaid)
-                    rate = coins[cur]['price']
-                    amt += unpaid * rate 
-                except:
-                    print(response.text)
-                    raise
+            amt += self.saveFetchBalance(url, address, coins)
 
         return amt
+
+    def saveFetchBalance(self, url, address, coins):
+        for i in range(0, 3):
+            amt = self.fetchBalance(url, address, coins)
+            if amt > 0:
+                return amt
+
+        return 0
+
+    def fetchBalance(self, url, address, coins):
+        response = requests.get(url + '/api/wallet?address=' + address)
+        if response.status_code == 200 and response.text.strip():
+            try:
+                data = response.json()
+                unpaid = data['unpaid']
+                cur = data['currency']
+                if cur == 'BTC':
+                    cur = 'bitcoin'
+                elif cur == 'LTC':
+                    cur = 'litecoin'
+                print(unpaid)
+                rate = coins[cur]['price']
+                return unpaid * rate 
+            except:
+                print(response.text)
+                raise
+        else:
+            return 0
 
     def workers(self, config, coins):
         url = config['url']
