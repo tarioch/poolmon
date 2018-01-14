@@ -16,7 +16,7 @@ class Yiimp:
             if amt > 0:
                 return amt
 
-        return 0
+        raise ValueError('Not able to fetch an amount')
 
     def fetchBalance(self, url, address, coins):
         response = requests.get(url + '/api/wallet?address=' + address)
@@ -36,6 +36,7 @@ class Yiimp:
                 print(response.text)
                 raise
         else:
+            print(response.text)
             return 0
 
     def workers(self, config, coins):
