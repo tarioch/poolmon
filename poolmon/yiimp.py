@@ -19,8 +19,8 @@ class Yiimp:
         raise ValueError('Not able to fetch an amount')
 
     def fetchBalance(self, url, address, coins):
-        response = requests.get(url + '/api/wallet?address=' + address)
         print(url + '/api/wallet?address=' + address)
+        response = requests.get(url + '/api/wallet?address=' + address)
         print(response.text)
         if response.status_code == 200 and response.text.strip():
             try:
