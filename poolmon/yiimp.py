@@ -20,6 +20,7 @@ class Yiimp:
 
     def fetchBalance(self, url, address, coins):
         response = requests.get(url + '/api/wallet?address=' + address)
+        print(url + '/api/wallet?address=' + address)
         print(response.text)
         if response.status_code == 200 and response.text.strip():
             try:
@@ -45,6 +46,7 @@ class Yiimp:
         workers = []
         for address in config['addresses']:
             try:
+                print(url + '/site/wallet_miners_results?address=' + address)
                 response = requests.get(url + '/site/wallet_miners_results?address=' + address)
                 if response.content.strip():
                     root = html.fromstring(response.content)
