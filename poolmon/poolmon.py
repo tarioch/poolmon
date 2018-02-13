@@ -115,18 +115,21 @@ def fetchApis():
         else:
             raise ValueError('Invalid type ' + type + ' for pool ' + name)
 
-        amt = fetcher.balance(pool, coins)
-        if amt > 0:
+        try:
+            amt = fetcher.balance(pool, coins)
+            if amt > 0:
+                data = []
+                data.append(balance(name, amt))
+                client.write_points(data)
+
             data = []
-            data.append(balance(name, amt))
+            workers = fetcher.workers(pool, coins)
+            for worker in workers:
+                data.append(active(name, worker))
+
             client.write_points(data)
-
-        data = []
-        workers = fetcher.workers(pool, coins)
-        for worker in workers:
-            data.append(active(name, worker))
-
-        client.write_points(data)
+        except ValueError as e:
+            print(e)
 
 app = Flask(__name__)
 

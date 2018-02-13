@@ -32,18 +32,19 @@ class MiningPoolHub:
             if response.status_code == 200:
                 data = response.json()
                 for worker in data['getuserworkers']['data']:
-                    hashrate = worker['hashrate']
-                    if hashrate > 0:
-                        name = worker['username'].split('.')[1]
-                        algo = coin['algo']
-                        key = name + '_' + algo 
-                        if not key in workers:
-                            workers[key] = {
-                                'miner': None,
-                                'name': name,
-                                'algo': algo, 
-                                'rate': 0
-                            }
-                        workers[key]['rate'] += hashrate
+                    if worker != 'error':
+                        hashrate = worker['hashrate']
+                        if hashrate > 0:
+                            name = worker['username'].split('.')[1]
+                            algo = coin['algo']
+                            key = name + '_' + algo 
+                            if not key in workers:
+                                workers[key] = {
+                                    'miner': None,
+                                    'name': name,
+                                    'algo': algo, 
+                                    'rate': 0
+                                }
+                            workers[key]['rate'] += hashrate
         return workers.values()
 
