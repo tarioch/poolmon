@@ -48,7 +48,7 @@ def extractRate(rateStr):
     if isinstance(rateStr, float):
         return rateStr
     elif isinstance(rateStr, int):
-        return rateStr
+        return float(rateStr)
 
     units = {
             'h/s': 1,
