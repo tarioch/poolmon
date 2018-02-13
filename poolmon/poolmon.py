@@ -47,7 +47,7 @@ def active(pool, worker):
 def extractRate(rateStr):
     if isinstance(rateStr, float):
         return rateStr
-    else if isinstance(rateStr, int):
+    elif isinstance(rateStr, int):
         return rateStr
 
     units = {
