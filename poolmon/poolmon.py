@@ -47,6 +47,8 @@ def active(pool, worker):
 def extractRate(rateStr):
     if isinstance(rateStr, float):
         return rateStr
+    else if isinstance(rateStr, int):
+        return rateStr
 
     units = {
             'h/s': 1,
@@ -57,6 +59,7 @@ def extractRate(rateStr):
             'th/s': 1000000000000,
             'ph/s': 1000000000000000,
     }
+
     rateStr = rateStr.replace(',', '.')
     parts = rateStr.split()
     rate = 0
@@ -90,7 +93,7 @@ def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, cu
     if estimatedHashrate:
         fields['estimatedhashrate'] = extractRate(estimatedHashrate)
     if income:
-        if isInstance(income, float):
+        if isinstance(income, float):
             fields['income'] = income
         else:
             fields['income'] = float(income.replace(',', '.'))
