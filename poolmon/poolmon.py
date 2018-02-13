@@ -90,7 +90,10 @@ def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, cu
     if estimatedHashrate:
         fields['estimatedhashrate'] = extractRate(estimatedHashrate)
     if income:
-        fields['income'] = float(income.replace(',', '.'))
+        if isInstance(income, float):
+            fields['income'] = income
+        else:
+            fields['income'] = float(income.replace(',', '.'))
     result['fields'] = fields
 
     return result
