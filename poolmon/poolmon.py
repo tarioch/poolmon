@@ -78,11 +78,11 @@ def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, cu
     tags['pool'] = pool.lower()
     tags['worker'] = worker.lower()
     if workertype:
-        tags['workertype'] = workertype.lower()
+        tags['workertype'] = workertype.lower().strip()
     if algo:
-        tags['algo'] = algo.lower()
+        tags['algo'] = algo.lower().strip()
     if miner:
-        tags['miner'] = miner.lower()
+        tags['miner'] = miner.lower().strip()
     tags['src'] = src
 
     result['tags'] = tags
