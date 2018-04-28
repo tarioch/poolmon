@@ -3,10 +3,10 @@ from lxml import html
 
 class Yiimp:
     def balance(self, config, coins):
-        url = config['url']
+        urlApi = config['url-api']
         amt = 0
         for address in config['addresses']:
-            amt += self.saveFetchBalance(url, address, coins)
+            amt += self.saveFetchBalance(urlApi, address, coins)
 
         return amt
 
@@ -42,12 +42,12 @@ class Yiimp:
             return 0
 
     def workers(self, config, coins):
-        url = config['url']
+        urlSite = config['url-site']
         workers = []
         for address in config['addresses']:
             try:
-                print(url + '/site/wallet_miners_results?address=' + address)
-                response = requests.get(url + '/site/wallet_miners_results?address=' + address)
+                print(urlSite + '/site/wallet_miners_results?address=' + address)
+                response = requests.get(urlSite + '/site/wallet_miners_results?address=' + address)
                 if response.content.strip():
                     root = html.fromstring(response.content)
                     rows = root.xpath('//table[last()]/tr')
