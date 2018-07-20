@@ -2,7 +2,6 @@ from influxdb import InfluxDBClient
 import requests
 import yaml
 import json
-from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 from yiimp import Yiimp
 from miningpoolhub import MiningPoolHub
@@ -134,37 +133,6 @@ def fetchApis():
         except ValueError as e:
             print(e)
 
-app = Flask(__name__)
-
-@app.route('/',methods=['POST'])
-def handle():
-    worker = request.form['workername']
-    miners = json.loads(str(request.form['miners']))
-
-    data = []
-    for miner in miners:
-        for i in range(0, len(miner['Algorithm'])):
-            data.append(stats(worker, miner, i))
-
-    client = InfluxDBClient(database='poolmon')
-    client.write_points(data)
-    print(data)
-
-    return 'ok'
-
-def stats(worker, miner, index):
-    return createActivity(
-        'mpm',
-        miner['Pool'][index],
-        worker,
-        miner['Type'][index],
-        miner['Algorithm'][index],
-        miner['Name'],
-        miner['CurrentSpeed'][index],
-        miner['EstimatedSpeed'][index],
-        miner['BTC/day'] if index == 0 else None
-    )
-    
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
@@ -176,4 +144,3 @@ if __name__ == '__main__':
         scheduler.add_job(fetchApis, 'interval', minutes=pollInterval)
         scheduler.start()
 
-    app.run(host=config['host'], port=config['port'], threaded=True)
