@@ -1,0 +1,34 @@
+{
+    "builders": [{
+        "type": "docker",
+        "image": "python",
+        "commit": true,
+        "changes": [
+            "WORKDIR /opt/poolmon",
+            "EXPOSE 8000",
+            "ENTRYPOINT /usr/local/bin/python /opt/poolmon/poolmon/poolmon.py"
+        ]
+    }],
+    "provisioners": [{
+        "type": "file",
+        "source": "poolmon",
+        "destination": "/opt"
+    },{
+        "type": "file",
+        "source": "Pipfile",
+        "destination": "/opt/poolmon/"
+    },{
+        "type": "shell",
+        "inline": [
+            "cd /opt/poolmon",
+            "pip install pipenv",
+            "pipenv lock",
+            "cat Pipfile.lock",
+            "pipenv install --deploy --system"
+        ]
+    }],
+    "post-processors": [{
+        "type": "docker-tag",
+        "repository": "tarioch/poolmon"
+    }]
+}
