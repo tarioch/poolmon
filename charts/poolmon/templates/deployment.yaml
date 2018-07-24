@@ -37,6 +37,14 @@ spec:
               port: http
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+          - name: config
+            mountPath: /opt/poolmon/config.yaml
+            subPath: config.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "poolmon.fullname" . }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

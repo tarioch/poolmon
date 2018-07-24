@@ -6,7 +6,7 @@
         "changes": [
             "WORKDIR /opt/poolmon",
             "EXPOSE 8000",
-            "ENTRYPOINT /usr/local/bin/python /opt/poolmon/poolmon/poolmon.py"
+            "ENTRYPOINT /usr/local/bin/python /opt/poolmon/poolmon.py"
         ]
     }],
     "provisioners": [{
