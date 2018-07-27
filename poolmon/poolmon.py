@@ -54,8 +54,8 @@ class CustomCollector(object):
 
         coins = coinInfo()
 
-        bal = GaugeMetricFamily('tarioch_poolmon.balance', 'Pool Balance', labels=['pool'])
-        activity = GaugeMetricFamily('tarioch_poolmon.activity', 'Pool Activity', labels=['pool', 'worker', 'algo', 'miner'])
+        bal = GaugeMetricFamily('tarioch_poolmon_balance', 'Pool Balance', labels=['pool'])
+        activity = GaugeMetricFamily('tarioch_poolmon_activity', 'Pool Activity', labels=['pool', 'worker', 'algo', 'miner'])
 
         for pool in config['pools']:
             name = pool['name']
