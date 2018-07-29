@@ -407,7 +407,8 @@
       "tableColumn": "endpoint",
       "targets": [
         {
-          "expr": "clamp_min(deriv(tarioch_poolmon_income_total[1h]), 0) * 60 * 60 * 24",
+          "$$hashKey": "object:1546",
+          "expr": "(deriv(tarioch_poolmon_income_total[1h]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -489,7 +490,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "clamp_min(deriv(tarioch_poolmon_income_total[1d]), 0) * 60 * 60 * 24",
+          "$$hashKey": "object:1620",
+          "expr": "(deriv(tarioch_poolmon_income_total[1d]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -727,7 +729,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -738,7 +740,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "clamp_min(deriv(tarioch_poolmon_balance[1h]), 0) * 60 * 60 * 24 ",
+          "$$hashKey": "object:1280",
+          "expr": "(deriv(tarioch_poolmon_balance[1h]) > 0) * 60 * 60 * 24 ",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ pool }}",
@@ -998,7 +1001,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1009,7 +1012,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "clamp_min(deriv(tarioch_poolmon_balance[1d]), 0) * 60 * 60 * 24",
+          "$$hashKey": "object:1360",
+          "expr": "(deriv(tarioch_poolmon_balance[1d]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1173,5 +1177,5 @@
   "timezone": "",
   "title": "Mining",
   "uid": "LQQ8Y1Kiz",
-  "version": 39
+  "version": 40
 }
