@@ -1,5 +1,5 @@
 from prometheus_client import start_http_server
-from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, REGISTRY 
+from prometheus_client.core import GaugeMetricFamily, REGISTRY 
 import requests
 import yaml
 import json
@@ -55,7 +55,6 @@ class CustomCollector(object):
         coins = coinInfo()
 
         bal = GaugeMetricFamily('tarioch_poolmon_balance', 'Pool Balance', labels=['pool'])
-        total = CounterMetricFamily('tarioch_poolmon_income_total', 'Total Pool Income', labels=['pool'])
         activity = GaugeMetricFamily('tarioch_poolmon_activity', 'Pool Activity', labels=['pool', 'worker', 'algo', 'miner'])
 
         for pool in config['pools']:
@@ -73,7 +72,6 @@ class CustomCollector(object):
                 amt = fetcher.balance(pool, coins)
                 if amt > 0:
                     bal.add_metric([name], amt)
-                    total.add_metric([name], amt)
 
                 workers = fetcher.workers(pool, coins)
                 for worker in workers:
@@ -88,7 +86,6 @@ class CustomCollector(object):
                 print(e)
 
         yield bal
-        yield total
         yield activity
 
 if __name__ == '__main__':
