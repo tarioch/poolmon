@@ -1,10 +1,11 @@
-from influxdb import InfluxDBClient
+from prometheus_client import start_http_server
+from prometheus_client.core import GaugeMetricFamily, REGISTRY 
 import requests
 import yaml
 import json
-from apscheduler.schedulers.background import BackgroundScheduler
 from yiimp import Yiimp
 from miningpoolhub import MiningPoolHub
+import time
 
 def coinInfo():
     response = requests.get('https://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics')
@@ -20,28 +21,6 @@ def coinInfo():
             }
 
     return coins
-
-def balance(pool, amount):
-    return {
-        'measurement': 'balance',
-        'tags': {
-            'pool': pool
-        },
-        'fields': {
-            'value': amount
-        }
-    }
-
-def active(pool, worker):
-    return createActivity(
-        'pool',
-        pool,
-        worker['name'],
-        None,
-        worker['algo'],
-        worker['miner'],
-        worker['rate']
-    )
 
 def extractRate(rateStr):
     if isinstance(rateStr, float):
@@ -69,78 +48,54 @@ def extractRate(rateStr):
 
     return float(rate)
 
-def createActivity(src, pool, worker, workertype=None, algo=None, miner=None, currentHashrate=None, estimatedHashrate=None, income=None):
-    result = {}
-    result['measurement'] = 'activity'
+class CustomCollector(object):
+    def collect(self):
+        print('Fetching APIs')
 
-    tags = {}
-    tags['pool'] = pool.lower()
-    tags['worker'] = worker.lower()
-    if workertype:
-        tags['workertype'] = workertype.lower().strip()
-    if algo:
-        tags['algo'] = algo.lower().strip()
-    if miner:
-        tags['miner'] = miner.lower().strip()
-    tags['src'] = src
+        coins = coinInfo()
 
-    result['tags'] = tags
+        bal = GaugeMetricFamily('tarioch_poolmon_balance', 'Pool Balance', labels=['pool'])
+        activity = GaugeMetricFamily('tarioch_poolmon_activity', 'Pool Activity', labels=['pool', 'worker', 'algo', 'miner'])
 
-    fields = {}
-    if currentHashrate:
-        fields['currenthashrate'] = extractRate(currentHashrate)
-    if estimatedHashrate:
-        fields['estimatedhashrate'] = extractRate(estimatedHashrate)
-    if income:
-        if isinstance(income, float):
-            fields['income'] = income
-        else:
-            fields['income'] = float(income.replace(',', '.'))
-    result['fields'] = fields
+        for pool in config['pools']:
+            name = pool['name']
 
-    return result
+            type = pool['type']
+            if 'yiimp' == type:
+                fetcher = Yiimp()
+            elif 'miningpoolhub' == type:
+                fetcher = MiningPoolHub()
+            else:
+                raise ValueError('Invalid type ' + type + ' for pool ' + name)
 
-def fetchApis():
-    print('Fetching APIs')
+            try:
+                amt = fetcher.balance(pool, coins)
+                if amt > 0:
+                    bal.add_metric([name], amt)
 
-    coins = coinInfo()
+                workers = fetcher.workers(pool, coins)
+                for worker in workers:
+                    activity.add_metric([
+                        name, 
+                        worker['name'].lower().strip(), 
+                        worker['algo'].lower().strip(), 
+                        worker['miner'].lower().strip()], 
+                        extractRate(worker['rate']))
 
-    client = InfluxDBClient(database='poolmon')
-    for pool in config['pools']:
-        name = pool['name']
+            except ValueError as e:
+                print(e)
 
-        type = pool['type']
-        if 'yiimp' == type:
-            fetcher = Yiimp()
-        elif 'miningpoolhub' == type:
-            fetcher = MiningPoolHub()
-        else:
-            raise ValueError('Invalid type ' + type + ' for pool ' + name)
-
-        try:
-            amt = fetcher.balance(pool, coins)
-            if amt > 0:
-                data = []
-                data.append(balance(name, amt))
-                client.write_points(data)
-
-            data = []
-            workers = fetcher.workers(pool, coins)
-            for worker in workers:
-                data.append(active(name, worker))
-
-            client.write_points(data)
-        except ValueError as e:
-            print(e)
+        yield bal
+        yield activity
 
 if __name__ == '__main__':
     with open('config.yaml', 'r') as configFile:
         config = yaml.safe_load(configFile)
 
-    fetchApis()
-    pollInterval = config['poll_interval']
-    if pollInterval > 0:
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(fetchApis, 'interval', minutes=pollInterval)
-        scheduler.start()
+    REGISTRY.register(CustomCollector())
+
+    start_http_server(8000)
+
+    while True:
+        time.sleep(10)
 
