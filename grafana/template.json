@@ -1,8 +1,49 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
-        "$$hashKey": "object:249",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -16,13 +57,13 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 43,
-  "iteration": 1532884642279,
+  "id": null,
+  "iteration": 1538157467755,
   "links": [],
   "panels": [
     {
       "columns": [],
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "fontSize": "100%",
       "gridPos": {
         "h": 5,
@@ -189,7 +230,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 4,
       "format": "none",
       "gauge": {
@@ -268,7 +309,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 5,
@@ -354,7 +395,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 4,
       "format": "none",
       "gauge": {
@@ -407,7 +448,6 @@
       "tableColumn": "endpoint",
       "targets": [
         {
-          "$$hashKey": "object:1546",
           "expr": "(deriv(tarioch_poolmon_income_total[1h]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "intervalFactor": 1,
@@ -437,7 +477,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 4,
       "format": "none",
       "gauge": {
@@ -490,7 +530,6 @@
       "tableColumn": "",
       "targets": [
         {
-          "$$hashKey": "object:1620",
           "expr": "(deriv(tarioch_poolmon_income_total[1d]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "intervalFactor": 1,
@@ -513,202 +552,10 @@
     },
     {
       "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 8,
-        "y": 5
-      },
-      "id": 20,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": null,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": "worker",
-      "repeatDirection": "h",
-      "scopedVars": {
-        "worker": {
-          "$$hashKey": "object:1134",
-          "selected": false,
-          "text": "coruscant",
-          "value": "coruscant"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "$$hashKey": "object:391",
-          "expr": "count_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{ algo }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "1d",
-      "timeShift": null,
-      "title": "$worker Algo Frequency",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "total"
-        ]
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 13,
-        "y": 5
-      },
-      "id": 21,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "minSpan": null,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1532884642279,
-      "repeatPanelId": 20,
-      "scopedVars": {
-        "worker": {
-          "$$hashKey": "object:1135",
-          "selected": false,
-          "text": "miner1",
-          "value": "miner1"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "$$hashKey": "object:391",
-          "expr": "count_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{ algo }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "1d",
-      "timeShift": null,
-      "title": "$worker Algo Frequency",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "total"
-        ]
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -740,7 +587,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:1280",
           "expr": "(deriv(tarioch_poolmon_balance[1h]) > 0) * 60 * 60 * 24 ",
           "format": "time_series",
           "intervalFactor": 1,
@@ -787,200 +633,10 @@
     },
     {
       "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 8,
-        "y": 14
-      },
-      "id": 14,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": "worker",
-      "repeatDirection": "h",
-      "scopedVars": {
-        "worker": {
-          "$$hashKey": "object:1134",
-          "selected": false,
-          "text": "coruscant",
-          "value": "coruscant"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "$$hashKey": "object:742",
-          "expr": "avg_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{ algo }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "1d",
-      "timeShift": null,
-      "title": "$worker Algo Rates",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "total"
-        ]
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 13,
-        "y": 14
-      },
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1532884642279,
-      "repeatPanelId": 14,
-      "scopedVars": {
-        "worker": {
-          "$$hashKey": "object:1135",
-          "selected": false,
-          "text": "miner1",
-          "value": "miner1"
-        }
-      },
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "$$hashKey": "object:742",
-          "expr": "avg_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{ algo }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "1d",
-      "timeShift": null,
-      "title": "$worker Algo Rates",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "series",
-        "name": null,
-        "show": true,
-        "values": [
-          "total"
-        ]
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -1012,7 +668,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:1360",
           "expr": "(deriv(tarioch_poolmon_balance[1d]) > 0) * 60 * 60 * 24",
           "format": "time_series",
           "interval": "",
@@ -1057,6 +712,177 @@
           "show": true
         }
       ]
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 28
+      },
+      "id": 20,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": null,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": "worker",
+      "repeatDirection": "v",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "count_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ algo }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "1d",
+      "timeShift": null,
+      "title": "$worker Algo Frequency",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ]
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 35
+      },
+      "id": 14,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": "worker",
+      "repeatDirection": "v",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg_over_time(tarioch_poolmon_activity{worker=\"$worker\"}[1d])",
+          "format": "time_series",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{ algo }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "1d",
+      "timeShift": null,
+      "title": "$worker Algo Rates",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ]
     }
   ],
   "schemaVersion": 16,
@@ -1066,41 +892,16 @@
     "list": [
       {
         "allValue": null,
-        "current": {
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "worker",
-        "options": [
-          {
-            "$$hashKey": "object:1133",
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "$$hashKey": "object:1134",
-            "selected": false,
-            "text": "coruscant",
-            "value": "coruscant"
-          },
-          {
-            "$$hashKey": "object:1135",
-            "selected": false,
-            "text": "miner1",
-            "value": "miner1"
-          }
-        ],
+        "options": [],
         "query": "label_values(worker)",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",
@@ -1111,30 +912,16 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "zergpool",
-          "value": "zergpool"
-        },
-        "datasource": "prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "pool",
-        "options": [
-          {
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": true,
-            "text": "zergpool",
-            "value": "zergpool"
-          }
-        ],
+        "options": [],
         "query": "label_values(pool)",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",
@@ -1177,5 +964,5 @@
   "timezone": "",
   "title": "Mining",
   "uid": "LQQ8Y1Kiz",
-  "version": 40
+  "version": 7
 }
